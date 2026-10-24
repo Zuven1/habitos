@@ -42,5 +42,6 @@ _flutter.buildConfig = {"engineRevision":"cf636b1dfb818dd6a3ff16e390e93b1a036969
 
 
 // Sin el service worker de Flutter (obsoleto, y se borraría a sí mismo
-// junto con el nuestro): el de los avisos se registra en index.html.
+// junto con el nuestro): el de los avisos (push-sw.js) se registra en
+// index.html.
 _flutter.loader.load();
