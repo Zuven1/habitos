@@ -10,5 +10,5 @@ app_id: 06fbd8f1-5a44-433a-bdf3-354bd904c171
 # auto_update controls if Shorebird should automatically update in the background on launch.
 # If auto_update: false, you will need to use package:shorebird_code_push to trigger updates.
 # https://pub.dev/packages/shorebird_code_push
-# Uncomment the following line to disable automatic updates.
-# auto_update: false
+# La app misma baja los parches cuando se pulsa «Actualizar» (UpdateService).
+auto_update: false

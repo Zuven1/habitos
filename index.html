@@ -47,8 +47,27 @@
   <div id="splash"><img src="icons/Icon-192.png" alt=""></div>
   <script>
     // Avisos push (iPhone con la app en la pantalla de inicio, iOS 16.4+).
+    // También guarda la app en el móvil para que abra al instante. Cuando
+    // llega una versión nueva se recarga sola, sin que se note: al volver a
+    // la app, o al instante si estaba en segundo plano.
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('push-sw.js');
+      var hadController = !!navigator.serviceWorker.controller;
+      var reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (!hadController) { hadController = true; return; }
+        if (reloading) return;
+        var go = function () { reloading = true; location.reload(); };
+        if (document.hidden) { go(); return; }
+        document.addEventListener('visibilitychange', function once() {
+          if (document.hidden) { document.removeEventListener('visibilitychange', once); go(); }
+        });
+      });
+      navigator.serviceWorker.register('push-sw.js').then(function (r) {
+        // Mira si hay versión nueva cada vez que se vuelve a la app.
+        document.addEventListener('visibilitychange', function () {
+          if (!document.hidden) r.update().catch(function () {});
+        });
+      });
     }
     window.addEventListener('flutter-first-frame', function () {
       var s = document.getElementById('splash');
