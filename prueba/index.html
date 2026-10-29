@@ -76,11 +76,7 @@
       align-items: center; justify-content: center; gap: 14px; background: #0F0F11; }
     #gate img { width: 76px; height: 76px; border-radius: 20px; }
     #gate h1 { margin: 0 0 6px; font-size: 22px; font-weight: 800; }
-    #gate input { width: min(280px, 76vw); box-sizing: border-box; padding: 14px 16px; font-size: 16px;
-      border-radius: 16px; border: 1px solid #3a3a40; background: #1c1c1f; color: inherit; text-align: center; }
-    #gate button { width: min(280px, 76vw); border: 0; border-radius: 26px; padding: 14px; font: inherit;
-      font-weight: 800; font-size: 16px; background: #f7883e; color: #1c1c1e; }
-    #gate p { margin: 0; min-height: 18px; font-size: 13px; color: #e5776b; }
+    #gate p { margin: 0; max-width: 260px; text-align: center; font-size: 14px; color: #a3a3ab; }
 
     /* «¿Añadir Alop a tu pantalla de inicio?» */
     #inst { position: fixed; inset: 0; z-index: 6; display: none; align-items: flex-end; justify-content: center;
@@ -117,9 +113,7 @@
   <div id="gate" class="ui">
     <img src="icons/Icon-192.png" alt="">
     <h1>Alop</h1>
-    <input id="gpw" type="password" placeholder="Contraseña" autocomplete="current-password">
-    <button id="gbtn">Entrar</button>
-    <p id="gerr"></p>
+    <p id="gerr">Necesitas el enlace que te han compartido para entrar.</p>
   </div>
   <div id="splash" class="ui"><img src="icons/Icon-192.png" alt=""><b>Alop</b><i></i></div>
 
@@ -245,10 +239,12 @@
     }
   </script>
   <script>
-    // Barrera ligera de acceso (solo web): se compara un hash SHA-256 y se
-    // recuerda el desbloqueo en este dispositivo. No es seguridad real.
+    // Barrera ligera de acceso (solo web): sin contraseña que escribir. Quien
+    // tiene el enlace con ?k=CLAVE entra solo, y el móvil lo recuerda; sin
+    // esa clave (ni un desbloqueo ya guardado) se queda fuera. No es
+    // seguridad real, solo evita que alguien llegue sin el enlace.
     (function () {
-      var HASH = '01f2d0ba089250d88379b37540c9f1f6c2f46eb3d0b1b58339efd705a8ae459d';
+      var HASH = 'ab0f612d11beb7d8220678578f17237a900247a1224523ebdea9c185d8c814b0';
       function load() {
         var g = document.getElementById('gate'); if (g) g.remove();
         var s = document.createElement('script');
@@ -263,20 +259,28 @@
       var ok = false;
       try { ok = localStorage.getItem('web.acceso') === HASH; } catch (_) {}
       if (ok) return load();
-      document.getElementById('splash').style.display = 'none';
-      var gate = document.getElementById('gate'); gate.style.display = 'flex';
-      var inp = document.getElementById('gpw'), err = document.getElementById('gerr');
-      function go() {
-        sha(inp.value.trim()).then(function (h) {
+      var q = new URLSearchParams(location.search);
+      var k = q.get('k');
+      if (k) {
+        sha(k).then(function (h) {
           if (h === HASH) {
             try { localStorage.setItem('web.acceso', HASH); } catch (_) {}
-            document.getElementById('splash').style.display = '';
+            // Fuera la clave de la barra de direcciones y del historial.
+            q.delete('k');
+            var clean = location.pathname + (q.toString() ? '?' + q.toString() : '') + location.hash;
+            try { history.replaceState(null, '', clean); } catch (_) {}
             load();
-          } else { err.textContent = 'Contraseña incorrecta'; inp.value = ''; }
+          } else {
+            show();
+          }
         });
+        return;
       }
-      document.getElementById('gbtn').onclick = go;
-      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+      show();
+      function show() {
+        document.getElementById('splash').style.display = 'none';
+        document.getElementById('gate').style.display = 'flex';
+      }
     })();
   </script>
 </body>
