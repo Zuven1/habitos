@@ -173,25 +173,31 @@
     // avisos push (iPhone con la app en la pantalla de inicio, iOS 16.4+).
     var swReady = null;
     if ('serviceWorker' in navigator) {
-      swReady = navigator.serviceWorker.register('push-sw.js').catch(function () { return null; });
+      // Si ya hay uno, solo se mira si hay versión nueva (con su dirección
+      // de siempre); si no, se registra.
+      swReady = navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg) { reg.update().catch(function () {}); return reg; }
+        return navigator.serviceWorker.register('push-sw.js');
+      }).catch(function () { return null; });
     }
-    // «Actualizar» de la app: trae el service worker nuevo (con su caché de
-    // la versión nueva) y recarga cuando ya manda él.
+    // «Actualizar» de la app (como en Android): trae el service worker de la
+    // versión nueva, que deja lista su caché, y recarga cuando ya manda él.
+    // Se pide con una dirección distinta cada vez para que GitHub no dé uno
+    // guardado de antes.
     window.alopUpdate = function () {
-      var reload = function () { location.reload(); };
-      if (!swReady) return reload();
-      swReady.then(function (reg) {
-        if (!reg) return reload();
-        var done = false;
-        var finish = function () { if (!done) { done = true; reload(); } };
-        navigator.serviceWorker.addEventListener('controllerchange', finish);
-        setTimeout(finish, 20000);
-        reg.update().then(function () {
-          var w = reg.installing || reg.waiting;
-          if (!w) return finish();
-          w.addEventListener('statechange', function () { if (w.state === 'activated') finish(); });
-        }, finish);
-      });
+      var done = false;
+      var reload = function () { if (!done) { done = true; location.reload(); } };
+      if (!('serviceWorker' in navigator)) return reload();
+      navigator.serviceWorker.addEventListener('controllerchange', reload);
+      setTimeout(reload, 25000);
+      navigator.serviceWorker.register('push-sw.js?u=' + Date.now()).then(function (reg) {
+        var w = reg.installing || reg.waiting;
+        if (!w) return reload();
+        if (w.state === 'activated') return reload();
+        w.addEventListener('statechange', function () {
+          if (w.state === 'activated' || w.state === 'redundant') reload();
+        });
+      }, reload);
     };
     window.addEventListener('flutter-first-frame', function () {
       var s = document.getElementById('splash');
