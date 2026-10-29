@@ -1,14 +1,18 @@
 {
-    "name": "Hábitos",
-    "short_name": "Hábitos",
-    "start_url": ".",
+    "id": "./",
+    "name": "Alop",
+    "short_name": "Alop",
+    "start_url": "./",
+    "scope": "./",
     "display": "standalone",
     "background_color": "#0F0F11",
     "theme_color": "#0F0F11",
-    "description": "Registro de hábitos",
+    "description": "Hábitos, estudio y deporte con tus amigos",
     "lang": "es",
+    "dir": "ltr",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "categories": ["lifestyle", "productivity", "health"],
     "icons": [
         {
             "src": "icons/Icon-192.png",
