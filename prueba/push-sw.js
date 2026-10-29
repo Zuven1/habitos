@@ -13,7 +13,7 @@
 // fuentes…) se copia de la anterior sin volver a bajarlo; solo se baja lo
 // nuevo. Así nunca se mezclan archivos de dos versiones y actualizar cuesta
 // poco. Sin sustituir (desarrollo), no cachea.
-const BUILD = 'dee25f9-20261029191958';
+const BUILD = '8ee7b0c-20261029193708';
 const CACHE = `alop-${BUILD}`;
 const ENABLED = !BUILD.startsWith('__');
 // { 'ruta': 'huella' } de todos los archivos de esta publicación.
